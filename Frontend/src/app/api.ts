@@ -3,7 +3,8 @@ export type SurveyPayload = {
   route: string;
   demographic: string;
   seatType: string;
-  painPoints: [string, string, string];
+  hasPainPoints: boolean | null;
+  painPoints: string[];
   sleepComfort: string;
 };
 

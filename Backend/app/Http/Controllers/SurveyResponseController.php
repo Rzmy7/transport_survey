@@ -15,8 +15,9 @@ class SurveyResponseController extends Controller
             'route' => ['required', 'string', 'max:255'],
             'demographic' => ['required', 'string', 'max:255'],
             'seatType' => ['required', 'string', 'max:255'],
-            'painPoints' => ['required', 'array', 'size:3'],
-            'painPoints.*' => ['required', 'string', 'max:255'],
+            'hasPainPoints' => ['nullable', 'boolean'],
+            'painPoints' => ['present', 'array', 'max:20', 'required_if:hasPainPoints,true'],
+            'painPoints.*' => ['string', 'max:255'],
             'sleepComfort' => ['required', 'string', 'max:255'],
         ]);
 

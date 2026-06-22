@@ -6,6 +6,7 @@ import {
 import {
   ChevronRight, ChevronLeft, CheckCircle, BarChart2, Download,
   Bus, ArrowRight, RotateCcw, Home, AlertCircle, LogOut, MapPin,
+  Plus, X
 } from "lucide-react";
 import {
   adminLogin,
@@ -30,7 +31,8 @@ type CurrentAnswers = {
   route: string;
   demographic: string;
   seatType: string;
-  painPoints: [string, string, string];
+  hasPainPoints: boolean | null;
+  painPoints: string[];
   sleepComfort: string;
 };
 
@@ -280,28 +282,77 @@ function Q4({ value, onChange }: { value: string; onChange: (v: string) => void 
   );
 }
 
-function Q5({ value, onChange }: { value: [string, string, string]; onChange: (v: [string, string, string]) => void }) {
-  const placeholders = ["e.g. Back pain", "e.g. Leg discomfort", "e.g. Insufficient seat cushioning"];
+function Q5({
+  hasPainPoints,
+  painPoints,
+  onChange,
+}: {
+  hasPainPoints: boolean | null;
+  painPoints: string[];
+  onChange: (hasPain: boolean | null, pp: string[]) => void;
+}) {
   return (
-    <div className="space-y-4">
-      {value.map((v, i) => (
-        <div key={i} className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="text-xs font-bold text-blue-700">{i + 1}</span>
-          </div>
-          <input
-            type="text"
-            value={v}
-            onChange={e => {
-              const next = [...value] as [string, string, string];
-              next[i] = e.target.value;
-              onChange(next);
-            }}
-            placeholder={placeholders[i]}
-            className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:outline-none text-gray-800 placeholder-gray-400 transition-colors text-sm"
-          />
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <RadioOption
+          value="no"
+          label="No, I did not experience any pain points"
+          selected={hasPainPoints === false}
+          onChange={() => onChange(false, [])}
+        />
+        <RadioOption
+          value="yes"
+          label="Yes, I experienced pain points"
+          selected={hasPainPoints === true}
+          onChange={() => onChange(true, painPoints.length ? painPoints : [""])}
+        />
+      </div>
+
+      {hasPainPoints === true && (
+        <div className="space-y-4 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
+          <label className="block text-sm font-bold text-gray-700">Please list your pain points:</label>
+          {painPoints.map((v, i) => (
+            <div key={i} className="relative flex items-center gap-3">
+              <div className="relative flex-1">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="text-xs font-bold text-blue-700">{i + 1}</span>
+                </div>
+                <input
+                  type="text"
+                  value={v}
+                  maxLength={255}
+                  onChange={e => {
+                    const next = [...painPoints];
+                    next[i] = e.target.value;
+                    onChange(true, next);
+                  }}
+                  placeholder="e.g. Insufficient seat cushioning"
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:outline-none text-gray-800 placeholder-gray-400 transition-colors text-sm"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  const next = painPoints.filter((_, idx) => idx !== i);
+                  onChange(true, next);
+                }}
+                className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl border-2 border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors"
+                aria-label="Remove pain point"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
+          {painPoints.length < 20 && (
+            <button
+              onClick={() => onChange(true, [...painPoints, ""])}
+              className="flex items-center gap-2 text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors py-2 px-1"
+            >
+              <Plus className="w-4 h-4" />
+              Add Another Pain Point
+            </button>
+          )}
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -450,7 +501,7 @@ function SurveyPage({
   submitError: string;
   onNext: () => void;
   onPrev: () => void;
-  onChange: (field: string, value: string | [string, string, string]) => void;
+  onChange: (field: string, value: any) => void;
 }) {
   const q = QUESTIONS[step];
   const isLast = step === QUESTIONS.length - 1;
@@ -493,7 +544,14 @@ function SurveyPage({
             <Q4 value={current.seatType} onChange={v => onChange("seatType", v)} />
           )}
           {step === 4 && (
-            <Q5 value={current.painPoints} onChange={v => onChange("painPoints", v)} />
+            <Q5
+              hasPainPoints={current.hasPainPoints}
+              painPoints={current.painPoints}
+              onChange={(has, pp) => {
+                onChange("hasPainPoints", has);
+                onChange("painPoints", pp);
+              }}
+            />
           )}
           {step === 5 && (
             <Q6 value={current.sleepComfort} onChange={v => onChange("sleepComfort", v)} />
@@ -877,7 +935,8 @@ const INITIAL_ANSWERS: CurrentAnswers = {
   route: "",
   demographic: "",
   seatType: "",
-  painPoints: ["", "", ""],
+  hasPainPoints: null,
+  painPoints: [],
   sleepComfort: "",
 };
 
@@ -949,7 +1008,7 @@ export default function App() {
       .finally(() => setAnalyticsLoading(false));
   }, [view]);
 
-  const updateField = useCallback((field: string, value: string | [string, string, string]) => {
+  const updateField = useCallback((field: string, value: any) => {
     setCurrent(prev => ({ ...prev, [field]: value }));
     setSubmitError("");
     setErrors(prev => {
@@ -963,10 +1022,16 @@ export default function App() {
   function validate(): boolean {
     const field = QUESTIONS[step].field;
     if (field === "painPoints") {
-      const pp = current.painPoints;
-      if (!pp[0].trim() && !pp[1].trim() && !pp[2].trim()) {
-        setErrors({ painPoints: "Please enter at least one pain point." });
+      if (current.hasPainPoints === null) {
+        setErrors({ painPoints: "Please select whether you experienced any pain points." });
         return false;
+      }
+      if (current.hasPainPoints === true) {
+        const hasValid = current.painPoints.some(p => p.trim() !== "");
+        if (!hasValid) {
+          setErrors({ painPoints: "Please enter at least one pain point, or select 'No'." });
+          return false;
+        }
       }
       return true;
     }
@@ -1012,11 +1077,11 @@ export default function App() {
   function exportCSV() {
     const all = loadResponses();
     if (!all.length) return;
-    const headers = ["ID", "Timestamp", "Bus Type", "Route", "Demographic", "Seat Type Used", "Pain Point 1", "Pain Point 2", "Pain Point 3", "Sleep Comfort Seat Preference"];
+    const headers = ["ID", "Timestamp", "Bus Type", "Route", "Demographic", "Seat Type Used", "Pain Points", "Sleep Comfort Seat Preference"];
     const rows = all.map(r => [
       r.id, r.timestamp, r.busType, r.route, r.demographic,
       r.seatType === "A" ? "Fixed High-Back (A)" : "Padded Bench (B)",
-      r.painPoints[0] || "", r.painPoints[1] || "", r.painPoints[2] || "",
+      r.painPoints.join(" | "),
       r.sleepComfort === "A" ? "Fixed High-Back (A)" : "Padded Bench (B)",
     ]);
     const csv = [headers, ...rows]

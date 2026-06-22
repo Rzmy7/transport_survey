@@ -56,3 +56,10 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Automated Testing
+
+### AI Agent Note
+**IMPORTANT FOR FUTURE AI AGENTS:** All automated tests must run against the dedicated testing database to prevent wiping the local development database. 
+
+This project uses an isolated testing environment configured via `.env.testing` and `phpunit.xml` with `DB_DATABASE=:memory:`. Never override the database connection back to the default SQLite database while executing `php artisan test` or PHPUnit.
