@@ -54,6 +54,13 @@ CMD set -ex; \
     sed -i "s/:80/:${PORT:-8000}/g" /etc/apache2/sites-available/000-default.conf; \
     sed -i "s/Listen 80/Listen ${PORT:-8000}/g" /etc/apache2/ports.conf; \
     echo "=== 3. Testing Apache Configuration ==="; \
+    echo "--- DIAGNOSTICS: mods-enabled ---"; \
+    ls -la /etc/apache2/mods-enabled || true; \
+    echo "--- DIAGNOSTICS: grep LoadModule ---"; \
+    grep -R "LoadModule.*mpm" /etc/apache2 || true; \
+    echo "--- DIAGNOSTICS: apachectl -M ---"; \
+    apachectl -M || true; \
+    echo "--- END DIAGNOSTICS ---"; \
     apachectl -t; \
     echo "=== 4. Checking Environment Status ==="; \
     php artisan about || true; \
