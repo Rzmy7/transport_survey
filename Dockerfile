@@ -54,12 +54,14 @@ CMD set -ex; \
     sed -i "s/:80/:${PORT:-8000}/g" /etc/apache2/sites-available/000-default.conf; \
     sed -i "s/Listen 80/Listen ${PORT:-8000}/g" /etc/apache2/ports.conf; \
     echo "=== 3. Testing Apache Configuration ==="; \
-    echo "--- DIAGNOSTICS: mods-enabled ---"; \
-    ls -la /etc/apache2/mods-enabled || true; \
-    echo "--- DIAGNOSTICS: grep LoadModule ---"; \
-    grep -R "LoadModule.*mpm" /etc/apache2 || true; \
-    echo "--- DIAGNOSTICS: apachectl -M ---"; \
-    apachectl -M || true; \
+    echo "--- Applying minimal runtime fix for MPM conflict ---"; \
+    echo "--- DIAGNOSTICS: readlink mpm_event.load ---"; \
+    readlink -f /etc/apache2/mods-enabled/mpm_event.load || true; \
+    echo "--- DIAGNOSTICS: readlink mpm_prefork.load ---"; \
+    readlink -f /etc/apache2/mods-enabled/mpm_prefork.load || true; \
+    rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.*; \
+    echo "--- DIAGNOSTICS: mods-enabled mpm ---"; \
+    ls -la /etc/apache2/mods-enabled | grep mpm || true; \
     echo "--- END DIAGNOSTICS ---"; \
     apachectl -t; \
     echo "=== 4. Checking Environment Status ==="; \
