@@ -1,3 +1,5 @@
+import i18n from '../i18n/i18n';
+
 export type SurveyPayload = {
   busType: string;
   route: string;
@@ -34,7 +36,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const data = contentType.includes("application/json") ? await response.json() : null;
 
   if (!response.ok) {
-    const message = data?.message || "Something went wrong. Please try again.";
+    const message = data?.message || i18n.t("common.errorFallback");
     throw new Error(message);
   }
 

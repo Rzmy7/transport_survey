@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -122,17 +123,50 @@ function SeatPaddedBench({ selected }: { selected: boolean }) {
   );
 }
 
+// ─── Language Switcher ────────────────────────────────────────────────────────
+
+function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language?.startsWith('en');
+  
+  return (
+    <div className="flex items-center p-1 bg-blue-50 rounded-full border border-blue-100 shadow-inner">
+      <button
+        onClick={() => i18n.changeLanguage('si')}
+        className={`px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 ${
+          !isEn
+            ? "bg-white text-blue-900 shadow-sm border border-blue-200/50"
+            : "text-blue-600 hover:text-blue-800 hover:bg-blue-100/50"
+        }`}
+      >
+        සිංහල
+      </button>
+      <button
+        onClick={() => i18n.changeLanguage('en')}
+        className={`px-4 py-2 text-sm font-bold rounded-full transition-all duration-200 ${
+          isEn
+            ? "bg-white text-blue-900 shadow-sm border border-blue-200/50"
+            : "text-blue-600 hover:text-blue-800 hover:bg-blue-100/50"
+        }`}
+      >
+        English
+      </button>
+    </div>
+  );
+}
+
 // ─── Progress Bar ─────────────────────────────────────────────────────────────
 
 function ProgressBar({ step, total }: { step: number; total: number }) {
+  const { t } = useTranslation();
   const pct = Math.round(((step + 1) / total) * 100);
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
         <span className="text-xs font-semibold text-blue-700 tracking-wide uppercase">
-          Question {step + 1} of {total}
+          {t("survey.questionLabel")} {step + 1} {t("survey.of")} {total}
         </span>
-        <span className="text-xs font-bold text-blue-800">{pct}% complete</span>
+        <span className="text-xs font-bold text-blue-800">{pct}% {t("survey.complete")}</span>
       </div>
       <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
         <div
@@ -179,9 +213,10 @@ function RadioOption({
 }
 
 function Q1({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
   const options = [
-    { value: "SLTB Bus", label: "🔴 SLTB Bus (Sri Lanka Transport Board)" },
-    { value: "Private Bus", label: "🚌 Private Bus" },
+    { value: "SLTB Bus", label: t("survey.q1.sltb") },
+    { value: "Private Bus", label: t("survey.q1.private") },
   ];
   return (
     <div className="space-y-3">
@@ -193,6 +228,7 @@ function Q1({ value, onChange }: { value: string; onChange: (v: string) => void 
 }
 
 function Q2({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="relative">
@@ -201,7 +237,7 @@ function Q2({ value, onChange }: { value: string; onChange: (v: string) => void 
           type="text"
           value={value}
           onChange={e => onChange(e.target.value)}
-          placeholder="e.g. Panadura to Kandy"
+          placeholder={t("survey.q2.placeholder")}
           className="w-full pl-11 pr-4 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:outline-none text-gray-800 placeholder-gray-400 transition-colors text-sm"
         />
       </div>
@@ -210,11 +246,12 @@ function Q2({ value, onChange }: { value: string; onChange: (v: string) => void 
 }
 
 function Q3({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
   const options = [
-    { value: "Male (30–90)", label: "👨 Male (Age 30–90)" },
-    { value: "Female (30–90)", label: "👩 Female (Age 30–90)" },
-    { value: "Teenager (13–29)", label: "🧑 Teenager (Age 13–29)" },
-    { value: "Child (8–12)", label: "🧒 Child (Age 8–12)" },
+    { value: "Male (30–90)", label: t("survey.q3.male") },
+    { value: "Female (30–90)", label: t("survey.q3.female") },
+    { value: "Teenager (13–29)", label: t("survey.q3.teenager") },
+    { value: "Child (8–12)", label: t("survey.q3.child") },
   ];
   return (
     <div className="space-y-3">
@@ -234,6 +271,7 @@ function SeatCard({
   selected: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -254,7 +292,7 @@ function SeatCard({
       </div>
       {selected && (
         <div className="mt-2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-          Selected
+          {t("common.selected")}
         </div>
       )}
     </button>
@@ -262,19 +300,20 @@ function SeatCard({
 }
 
 function Q4({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-4">
       <SeatCard
         seatComp={SeatHighBack}
-        label="Option A"
-        sublabel="Fixed or Lightly Padded High-Back Seat"
+        label={t("survey.q4.optionA")}
+        sublabel={t("survey.q4.optionASub")}
         selected={value === "A"}
         onClick={() => onChange("A")}
       />
       <SeatCard
         seatComp={SeatPaddedBench}
-        label="Option B"
-        sublabel="Padded Bench-Style Bus Seating"
+        label={t("survey.q4.optionB")}
+        sublabel={t("survey.q4.optionBSub")}
         selected={value === "B"}
         onClick={() => onChange("B")}
       />
@@ -291,18 +330,19 @@ function Q5({
   painPoints: string[];
   onChange: (hasPain: boolean | null, pp: string[]) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div className="space-y-3">
         <RadioOption
           value="no"
-          label="No, I did not experience any pain points"
+          label={t("survey.q5.noPain")}
           selected={hasPainPoints === false}
           onChange={() => onChange(false, [])}
         />
         <RadioOption
           value="yes"
-          label="Yes, I experienced pain points"
+          label={t("survey.q5.yesPain")}
           selected={hasPainPoints === true}
           onChange={() => onChange(true, painPoints.length ? painPoints : [""])}
         />
@@ -310,7 +350,7 @@ function Q5({
 
       {hasPainPoints === true && (
         <div className="space-y-4 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
-          <label className="block text-sm font-bold text-gray-700">Please list your pain points:</label>
+          <label className="block text-sm font-bold text-gray-700">{t("survey.q5.prompt")}</label>
           {painPoints.map((v, i) => (
             <div key={i} className="relative flex items-center gap-3">
               <div className="relative flex-1">
@@ -326,7 +366,7 @@ function Q5({
                     next[i] = e.target.value;
                     onChange(true, next);
                   }}
-                  placeholder="e.g. Insufficient seat cushioning"
+                  placeholder={t("survey.q5.placeholder")}
                   className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:outline-none text-gray-800 placeholder-gray-400 transition-colors text-sm"
                 />
               </div>
@@ -348,7 +388,7 @@ function Q5({
               className="flex items-center gap-2 text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors py-2 px-1"
             >
               <Plus className="w-4 h-4" />
-              Add Another Pain Point
+              {t("survey.q5.addPainPoint")}
             </button>
           )}
         </div>
@@ -358,11 +398,12 @@ function Q5({
 }
 
 function Q6({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-5">
       {[
-        { val: "A", SeatComp: SeatHighBack, label: "Option A", sublabel: "Fixed or Lightly Padded High-Back Seat" },
-        { val: "B", SeatComp: SeatPaddedBench, label: "Option B", sublabel: "Padded Bench-Style Bus Seating" },
+        { val: "A", SeatComp: SeatHighBack, label: t("survey.q6.optionA"), sublabel: t("survey.q6.optionASub") },
+        { val: "B", SeatComp: SeatPaddedBench, label: t("survey.q6.optionB"), sublabel: t("survey.q6.optionBSub") },
       ].map(({ val, SeatComp, label, sublabel }) => (
         <button
           key={val}
@@ -400,6 +441,7 @@ function Q6({ value, onChange }: { value: string; onChange: (v: string) => void 
 function HomePage({
   onStart,
 }: { onStart: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background font-sans">
       <style>{`body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }`}</style>
@@ -411,10 +453,10 @@ function HomePage({
               <Bus className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-sm font-bold text-primary leading-none">PCES</div>
-              <div className="text-[10px] text-muted-foreground leading-none">Sri Lanka</div>
+              <div className="text-sm font-bold text-primary leading-none">{t("header.title")}</div>
+              <div className="text-[10px] text-muted-foreground leading-none">{t("header.subtitle")}</div>
             </div>
-          </div>
+          </div>          <LanguageSwitcher />
         </div>
       </header>
 
@@ -428,12 +470,12 @@ function HomePage({
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 to-blue-900/80" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
           <div className="inline-flex items-center gap-2 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
-            Research Survey · University Project
+            {t("home.tag")}
           </div>
           <h1 className="text-white text-2xl sm:text-4xl font-extrabold leading-tight max-w-xl">
-            Passenger Comfort<br />Evaluation System
+            {t("home.heroTitleLine1")}<br />{t("home.heroTitleLine2")}
           </h1>
-          <p className="text-blue-200 text-sm mt-2 font-medium">Sri Lankan Public Transportation · PCES</p>
+          <p className="text-blue-200 text-sm mt-2 font-medium">{t("home.heroSubtitle")}</p>
         </div>
       </div>
 
@@ -441,18 +483,15 @@ function HomePage({
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* About card */}
         <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-foreground mb-3">About This Survey</h2>
+          <h2 className="text-lg font-bold text-foreground mb-3">{t("home.aboutTitle")}</h2>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            This survey collects passenger feedback on seating comfort and travel experience in Sri Lankan public buses —
-            comparing <span className="font-semibold text-foreground">SLTB</span> and{" "}
-            <span className="font-semibold text-foreground">Private buses</span>. Your responses will help improve
-            passenger comfort and seating design in future bus services.
+            {t("home.aboutTextPart1")} <span className="font-semibold text-foreground">{t("home.aboutSltb")}</span> {t("home.aboutAnd")}{" "} <span className="font-semibold text-foreground">{t("home.aboutPrivate")}</span>{t("home.aboutTextPart2")}
           </p>
           <div className="grid grid-cols-3 gap-3 mt-4">
             {[
-              { icon: "🕐", label: "~3 minutes", sub: "to complete" },
-              { icon: "🔒", label: "Anonymous", sub: "no personal data" },
-              { icon: "🪑", label: "6 questions", sub: "one per page" },
+              { icon: "🕐", label: t("home.timeAmount"), sub: t("home.timeSub") },
+              { icon: "🔒", label: t("home.anonymousLabel"), sub: t("home.anonymousSub") },
+              { icon: "🪑", label: t("home.questionsLabel"), sub: t("home.questionsSub") },
             ].map(item => (
               <div key={item.label} className="bg-blue-50 rounded-xl p-3 text-center">
                 <div className="text-xl mb-1">{item.icon}</div>
@@ -468,12 +507,12 @@ function HomePage({
           onClick={onStart}
           className="w-full bg-primary hover:bg-blue-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-200 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 active:scale-[0.98] text-base"
         >
-          Start Survey
+          {t("home.startSurvey")}
           <ArrowRight className="w-5 h-5" />
         </button>
 
         <p className="text-center text-xs text-muted-foreground">
-          Sri Lankan Bus Passenger Comfort Evaluation Survey · For Research Purposes Only
+          {t("home.footerNote")}
         </p>
       </main>
     </div>
@@ -503,6 +542,7 @@ function SurveyPage({
   onPrev: () => void;
   onChange: (field: string, value: any) => void;
 }) {
+  const { t } = useTranslation();
   const q = QUESTIONS[step];
   const isLast = step === QUESTIONS.length - 1;
 
@@ -517,7 +557,7 @@ function SurveyPage({
           </div>
           <div className="flex-1">
             <ProgressBar step={step} total={QUESTIONS.length} />
-          </div>
+          </div>          <LanguageSwitcher />
         </div>
       </header>
 
@@ -526,10 +566,10 @@ function SurveyPage({
         <div className="flex-1">
           <div className="mb-2">
             <span className="text-xs font-bold uppercase tracking-widest text-blue-500">
-              Question {step + 1}
+              {t("survey.questionLabel")} {step + 1}
             </span>
           </div>
-          <h2 className="text-xl font-extrabold text-foreground mb-6 leading-snug">{q.label}</h2>
+          <h2 className="text-xl font-extrabold text-foreground mb-6 leading-snug">{t(`survey.${q.field === "demographic" ? "q3" : q.field === "busType" ? "q1" : q.field === "route" ? "q2" : q.field === "seatType" ? "q4" : q.field === "painPoints" ? "q5" : "q6"}.title`)}</h2>
 
           {step === 0 && (
             <Q1 value={current.busType} onChange={v => onChange("busType", v)} />
@@ -585,7 +625,7 @@ function SurveyPage({
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-bold hover:border-blue-300 hover:text-blue-700 transition-all"
             >
               <ChevronLeft className="w-4 h-4" />
-              Previous
+              {t("common.previous")}
             </button>
           )}
           <button
@@ -600,11 +640,11 @@ function SurveyPage({
             }`}
           >
             {submitting ? (
-              <>Submitting...</>
+              <>{t("common.submitting")}</>
             ) : isLast ? (
-              <>Submit Survey <CheckCircle className="w-4 h-4" /></>
+              <>{t("common.submit")} <CheckCircle className="w-4 h-4" /></>
             ) : (
-              <>Next <ChevronRight className="w-4 h-4" /></>
+              <>{t("common.next")} <ChevronRight className="w-4 h-4" /></>
             )}
           </button>
         </div>
@@ -618,6 +658,7 @@ function SurveyPage({
 function ThankYouPage({
   onStart,
 }: { onStart: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 font-sans">
       <style>{`body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }`}</style>
@@ -626,21 +667,18 @@ function ThankYouPage({
           <CheckCircle className="w-10 h-10 text-emerald-600" />
         </div>
         <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4 uppercase tracking-wide">
-          Submission Received
+          {t("thankyou.tag")}
         </div>
         <h1 className="text-2xl font-extrabold text-foreground mb-3">
-          Thank You for Participating!
+          {t("thankyou.title")}
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-          Thank you for participating in the <span className="font-semibold text-foreground">Sri Lankan Public Transportation
-          Passenger Comfort Survey</span>. Your feedback will contribute to improving passenger comfort and seating design
-          in future bus services.
+          {t("thankyou.textPart1")} <span className="font-semibold text-foreground">{t("thankyou.textBold")}</span>{t("thankyou.textPart2")}
         </p>
         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-left">
-          <div className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">Research Note</div>
+          <div className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">{t("thankyou.researchNoteTitle")}</div>
           <p className="text-xs text-blue-800 leading-relaxed">
-            This data is being collected for the <em>Passenger Comfort Evaluation System (PCES)</em> dissertation project
-            on Sri Lankan public transportation.
+            {t("thankyou.researchNoteTextPart1")} <em>{t("thankyou.researchNoteItalic")}</em> {t("thankyou.researchNoteTextPart2")}
           </p>
         </div>
         <div className="space-y-3">
@@ -649,7 +687,7 @@ function ThankYouPage({
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-white font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200"
           >
             <RotateCcw className="w-4 h-4" />
-            Submit Another Response
+            {t("thankyou.submitAnother")}
           </button>
         </div>
       </div>
@@ -682,6 +720,7 @@ function Dashboard({
   loading: boolean;
   error: string;
 }) {
+  const { t } = useTranslation();
   const sltb = analytics.busType.find(b => b.name === "SLTB Bus")?.value || 0;
   const priv = analytics.busType.find(b => b.name === "Private Bus")?.value || 0;
 
@@ -696,32 +735,32 @@ function Dashboard({
               <Home className="w-4 h-4 text-gray-600" />
             </button>
             <div>
-              <div className="text-sm font-bold text-foreground">Survey Analytics</div>
-              <div className="text-xs text-muted-foreground">PCES · Sri Lanka</div>
+              <div className="text-sm font-bold text-foreground">{t("dashboard.title")}</div>
+              <div className="text-xs text-muted-foreground">{t("dashboard.subtitle")}</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">            <LanguageSwitcher />
             <button
               onClick={onExport}
               disabled={analytics.total === 0 || loading}
               className="flex items-center gap-2 bg-primary hover:bg-blue-700 disabled:bg-gray-300 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              Export CSV
+              {t("common.exportCsv")}
             </button>
             <button
               onClick={onDeleteAll}
               disabled={analytics.total === 0 || loading}
               className="flex items-center gap-2 border border-red-200 text-red-700 text-xs font-bold px-4 py-2 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors disabled:opacity-50"
             >
-              Delete All Responses
+              {t("common.deleteAll")}
             </button>
             <button
               onClick={onLogout}
               className="flex items-center gap-2 border border-gray-200 text-gray-700 text-xs font-bold px-4 py-2 rounded-lg hover:border-blue-300 hover:text-blue-700 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Logout
+              {t("common.logout")}
             </button>
           </div>
         </div>
@@ -730,41 +769,41 @@ function Dashboard({
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
         {loading ? (
           <div className="text-center py-20">
-            <h2 className="text-xl font-bold text-foreground mb-2">Loading Analytics...</h2>
-            <p className="text-muted-foreground text-sm">Fetching the latest survey data from the backend.</p>
+            <h2 className="text-xl font-bold text-foreground mb-2">{t("dashboard.loadingTitle")}</h2>
+            <p className="text-muted-foreground text-sm">{t("dashboard.loadingSub")}</p>
           </div>
         ) : error ? (
           <div className="text-center py-20">
-            <h2 className="text-xl font-bold text-destructive mb-2">Unable to Load Analytics</h2>
+            <h2 className="text-xl font-bold text-destructive mb-2">{t("dashboard.errorTitle")}</h2>
             <p className="text-muted-foreground text-sm mb-6">{error}</p>
             <button onClick={onBack} className="bg-primary text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
-              Back to Survey
+              {t("common.backToSurvey")}
             </button>
           </div>
         ) : analytics.total === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">📊</div>
-            <h2 className="text-xl font-bold text-foreground mb-2">No Responses Yet</h2>
-            <p className="text-muted-foreground text-sm mb-6">Complete a survey to see analytics here.</p>
+            <h2 className="text-xl font-bold text-foreground mb-2">{t("dashboard.emptyTitle")}</h2>
+            <p className="text-muted-foreground text-sm mb-6">{t("dashboard.emptySub")}</p>
             <button onClick={onBack} className="bg-primary text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
-              Go to Survey
+              {t("common.goToSurvey")}
             </button>
           </div>
         ) : (
           <>
             {/* Stats row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard label="Total Responses" value={analytics.total} sub="passengers surveyed" />
-              <StatCard label="SLTB Riders" value={sltb} sub={`${analytics.total ? Math.round(sltb / analytics.total * 100) : 0}% of total`} />
-              <StatCard label="Private Bus" value={priv} sub={`${analytics.total ? Math.round(priv / analytics.total * 100) : 0}% of total`} />
-              <StatCard label="Pain Points" value={analytics.topPains.reduce((a, b) => a + b.value, 0)} sub="total reported" />
+              <StatCard label={t("dashboard.stats.totalResponses")} value={analytics.total} sub={t("dashboard.stats.passengersSurveyed")} />
+              <StatCard label={t("dashboard.stats.sltbRiders")} value={sltb} sub={`${analytics.total ? Math.round(sltb / analytics.total * 100) : 0}% ${t("dashboard.stats.ofTotal")}` } />
+              <StatCard label={t("dashboard.stats.privateBus")} value={priv} sub={`${analytics.total ? Math.round(priv / analytics.total * 100) : 0}% ${t("dashboard.stats.ofTotal")}` } />
+              <StatCard label={t("dashboard.stats.painPoints")} value={analytics.topPains.reduce((a, b) => a + b.value, 0)} sub={t("dashboard.stats.totalReported")} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Bus Type Pie */}
               <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-                <h3 className="font-bold text-foreground mb-1 text-sm">Bus Type Distribution</h3>
-                <p className="text-xs text-muted-foreground mb-4">SLTB vs Private Bus usage</p>
+                <h3 className="font-bold text-foreground mb-1 text-sm">{t("dashboard.charts.busTypeTitle")}</h3>
+                <p className="text-xs text-muted-foreground mb-4">{t("dashboard.charts.busTypeSub")}</p>
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
                     <Pie data={analytics.busType} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
@@ -777,8 +816,8 @@ function Dashboard({
 
               {/* Demographic Bar */}
               <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-                <h3 className="font-bold text-foreground mb-1 text-sm">Demographic Breakdown</h3>
-                <p className="text-xs text-muted-foreground mb-4">Age and gender categories</p>
+                <h3 className="font-bold text-foreground mb-1 text-sm">{t("dashboard.charts.demographicTitle")}</h3>
+                <p className="text-xs text-muted-foreground mb-4">{t("dashboard.charts.demographicSub")}</p>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={analytics.demographic} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f4ff" />
@@ -792,8 +831,8 @@ function Dashboard({
 
               {/* Seat Type Pie */}
               <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-                <h3 className="font-bold text-foreground mb-1 text-sm">Seat Type Used</h3>
-                <p className="text-xs text-muted-foreground mb-4">High-back vs Padded Bench</p>
+                <h3 className="font-bold text-foreground mb-1 text-sm">{t("dashboard.charts.seatTypeTitle")}</h3>
+                <p className="text-xs text-muted-foreground mb-4">{t("dashboard.charts.seatTypeSub")}</p>
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
                     <Pie
@@ -810,9 +849,9 @@ function Dashboard({
                 </ResponsiveContainer>
               </div>
 
-              {/* Sleep Comfort Preference */}
+              {/* {t("dashboard.charts.sleepComfortTitle")} */}
               <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-                <h3 className="font-bold text-foreground mb-1 text-sm">Sleep Comfort Preference</h3>
+                <h3 className="font-bold text-foreground mb-1 text-sm">{t("dashboard.charts.sleepComfortTitle")}</h3>
                 <p className="text-xs text-muted-foreground mb-4">Preferred seat for long-distance travel</p>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart
@@ -922,7 +961,7 @@ function AdminLoginPage({
             onClick={onBack}
             className="w-full border-2 border-gray-200 text-gray-700 font-bold py-3.5 rounded-xl hover:border-blue-300 hover:text-blue-700 transition-colors"
           >
-            Back to Survey
+            {t("common.backToSurvey")}
           </button>
         </div>
       </div>
@@ -1023,13 +1062,13 @@ export default function App() {
     const field = QUESTIONS[step].field;
     if (field === "painPoints") {
       if (current.hasPainPoints === null) {
-        setErrors({ painPoints: "Please select whether you experienced any pain points." });
+        setErrors({ painPoints: t("validation.selectPainPoint") });
         return false;
       }
       if (current.hasPainPoints === true) {
         const hasValid = current.painPoints.some(p => p.trim() !== "");
         if (!hasValid) {
-          setErrors({ painPoints: "Please enter at least one pain point, or select 'No'." });
+          setErrors({ painPoints: t("validation.enterAtLeastOne") });
           return false;
         }
       }
@@ -1037,7 +1076,7 @@ export default function App() {
     }
     const val = current[field as keyof CurrentAnswers];
     if (!val || (typeof val === "string" && !val.trim())) {
-      setErrors({ [field]: "This field is required." });
+      setErrors({ [field]: t("validation.required") });
       return false;
     }
     return true;
@@ -1077,7 +1116,7 @@ export default function App() {
   function exportCSV() {
     const all = loadResponses();
     if (!all.length) return;
-    const headers = ["ID", "Timestamp", "Bus Type", "Route", "Demographic", "Seat Type Used", "Pain Points", "Sleep Comfort Seat Preference"];
+    const headers = ["ID", "Timestamp", "Bus Type", "Route", "Demographic", t("dashboard.charts.seatTypeTitle"), "Pain Points", "Sleep Comfort Seat Preference"];
     const rows = all.map(r => [
       r.id, r.timestamp, r.busType, r.route, r.demographic,
       r.seatType === "A" ? "Fixed High-Back (A)" : "Padded Bench (B)",
