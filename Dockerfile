@@ -1,4 +1,15 @@
-FROM php:8.4-cli-bookworm
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /src/Frontend
+
+COPY Frontend/package*.json ./
+RUN npm ci
+
+COPY Frontend/ ./
+ENV VITE_API_BASE_URL=/api
+RUN npm run build
+
+FROM php:8.4-cli-bookworm AS app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -13,12 +24,12 @@ RUN apt-get update \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+WORKDIR /app/Backend
 
-COPY composer.json composer.lock ./
+COPY Backend/ ./
 RUN composer install --no-interaction --no-dev --optimize-autoloader
 
-COPY . .
+COPY --from=frontend-build /src/Frontend/dist ./public
 
 EXPOSE 8000
 

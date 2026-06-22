@@ -1,0 +1,12 @@
+.git
+.idea
+.vscode
+**/node_modules
+**/vendor
+**/dist
+**/.vite
+**/.env
+**/.env.*
+Frontend/.gitignore
+Backend/.gitignore
+README.md
