@@ -22,6 +22,7 @@ import {
   type Analytics,
   type SurveyPayload,
 } from "./api";
+import { t } from "i18next";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -1113,27 +1114,6 @@ export default function App() {
     setView("survey");
   }
 
-  function exportCSV() {
-    const all = loadResponses();
-    if (!all.length) return;
-    const headers = ["ID", "Timestamp", "Bus Type", "Route", "Demographic", t("dashboard.charts.seatTypeTitle"), "Pain Points", "Sleep Comfort Seat Preference"];
-    const rows = all.map(r => [
-      r.id, r.timestamp, r.busType, r.route, r.demographic,
-      r.seatType === "A" ? "Fixed High-Back (A)" : "Padded Bench (B)",
-      r.painPoints.join(" | "),
-      r.sleepComfort === "A" ? "Fixed High-Back (A)" : "Padded Bench (B)",
-    ]);
-    const csv = [headers, ...rows]
-      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
-      .join("\n");
-    const blob = new Blob(["﻿" + csv, ""], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `PCES_Survey_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   const legacyAnalytics = (() => {
     const all = loadResponses();
