@@ -22,4 +22,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan migrate --force --seed && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+CMD ["sh", "-c", "set -e; attempt=1; until php artisan migrate --force --seed; do if [ \"$attempt\" -ge 10 ]; then echo 'Database did not become available after 10 attempts.' >&2; exit 1; fi; attempt=$((attempt + 1)); echo \"Database not ready yet, retrying (${attempt}/10)...\" >&2; sleep 5; done; exec php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-8000}"]
