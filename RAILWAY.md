@@ -2,6 +2,8 @@
 
 Deploy the repository root as a single Railway service. The root `Dockerfile` builds the frontend, copies the production assets into Laravel, and starts the backend API in one container.
 
+Railway should use the Dockerfile builder for the root service. The repo includes a root `railway.json` that selects `DOCKERFILE` explicitly so Railpack does not try to infer the app type from the monorepo structure.
+
 ## Required variables
 
 Set these on the Railway service:
