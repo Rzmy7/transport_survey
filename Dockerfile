@@ -42,8 +42,8 @@ RUN composer install --no-interaction --no-dev --optimize-autoloader
 
 COPY --from=frontend-build /src/Frontend/dist ./public
 
-# Ensure storage directories are writable by Apache
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Ensure storage and database directories are writable by Apache
+RUN chown -R www-data:www-data storage bootstrap/cache database
 
 EXPOSE 8000
 
@@ -66,7 +66,13 @@ CMD set -ex; \
     apachectl -t; \
     echo "=== 4. Checking Environment Status ==="; \
     php artisan about || true; \
-    echo "=== 5. Waiting for Database ==="; \
+    echo "=== 5. Waiting for Database / Setting up SQLite ==="; \
+    if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then \
+        DB_PATH="${DB_DATABASE:-/app/Backend/database/database.sqlite}"; \
+        mkdir -p "$(dirname "$DB_PATH")"; \
+        touch "$DB_PATH"; \
+        chown -R www-data:www-data /app/Backend/database; \
+    fi; \
     attempt=1; \
     until php artisan migrate --force --seed; do \
         if [ "$attempt" -ge 10 ]; then \
