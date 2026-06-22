@@ -14,9 +14,10 @@ Set these on the Railway service:
 - `APP_URL` set to the Railway service URL
 - `APP_KEY`
 - `DB_CONNECTION=pgsql`
-- `DB_URL` set to the Railway Postgres connection string
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
+
+(Note: Railway provides `DATABASE_URL` automatically when you add a Postgres database plugin. The application will use this automatically, so you do not need to manually set `DB_URL` anymore.)
 
 The frontend is built with `VITE_API_BASE_URL=/api`, so it talks to the backend on the same domain and does not need its own Railway service or separate API URL.
 
