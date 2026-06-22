@@ -23,6 +23,10 @@ RUN apt-get update \
     && docker-php-ext-install pdo_pgsql pdo_sqlite zip mbstring \
     && rm -rf /var/lib/apt/lists/*
 
+# Fix AH00534: Multiple MPMs loaded by enforcing prefork
+RUN a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork
+
 # Configure Apache for Laravel
 RUN a2enmod rewrite \
     && sed -i 's!/var/www/html!/app/Backend/public!g' /etc/apache2/sites-available/000-default.conf \
